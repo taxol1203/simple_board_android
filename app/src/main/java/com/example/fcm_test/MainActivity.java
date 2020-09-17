@@ -3,8 +3,11 @@ package com.example.fcm_test;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 import static android.content.ContentValues.TAG;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -13,12 +16,19 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
+    Button writeButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        writeButton = findViewById(R.id.goto_write);
+
+
+        writeButton.setOnClickListener(this);
+
 
         FirebaseInstanceId.getInstance().getInstanceId()
                 .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
@@ -60,6 +70,14 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
                     }
                 });*/
+    }
+    @Override
+    public void onClick(View v){
+        switch (v.getId()){
+            case R.id.goto_write:
+                Intent intent1 = new Intent(getApplicationContext(), WritePost.class);
+                startActivity(intent1);
+        }
     }
 
 
