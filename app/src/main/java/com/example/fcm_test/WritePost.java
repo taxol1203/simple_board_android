@@ -55,11 +55,11 @@ public class WritePost extends AppCompatActivity {
     class InsertData extends AsyncTask<String, Void, String>{
         ProgressDialog progressDialog;
 
-       /* @Override
+        @Override
         protected void onPreExecute() {
             super.onPreExecute();
 
-            progressDialog = ProgressDialog.show(getApplicationContext(), "Please Wait", null, true, true);
+            progressDialog = ProgressDialog.show(WritePost.this, "Please Wait", null, true, true);
         }
 
         @Override
@@ -68,7 +68,7 @@ public class WritePost extends AppCompatActivity {
 
             progressDialog.dismiss();
             Log.e(Tag, "Post response - " + s);
-        }*/
+        }
 
         @Override
         protected String doInBackground(String... params) {
