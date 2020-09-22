@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 
 public class WritePost extends AppCompatActivity {
 
-    static String IP_ADDRESS = "192.168.1.45";
+    static String IP_ADDRESS = "192.168.1.27";
     static String Tag = "phptest";
 
     EditText mTitle;

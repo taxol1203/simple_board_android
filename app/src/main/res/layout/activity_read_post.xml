@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ReadPost">
+
+    <TextView
+        android:id="@+id/title_read_board"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="자유 게시판"
+        android:layout_margin="10dp"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/subTitle"
+        android:layout_centerHorizontal="true"
+        android:text="Space for Reading post."
+        android:layout_below="@+id/title_read_board"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        />
+    <LinearLayout
+        android:id="@+id/space_read"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/subTitle"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginTop="50dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:id="@+id/read_title"
+            android:text="여기에 제목"
+            android:textSize="25sp"
+            android:gravity="center_vertical"
+            android:paddingStart="10dp"
+            android:textColor="#000000"
+            android:background="@drawable/border_below"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:background="@drawable/border_below"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="글쓴이: "
+                android:textColor="#000000"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:id="@+id/read_writer"
+                android:text="여기에 글쓴이"
+                android:textSize="15sp"
+                android:gravity="center_vertical"
+                android:textColor="#000000"
+                />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:text="조회수: "
+                android:textColor="#000000" />
+            <TextView
+                android:id="@+id/read_hit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:text="여기 조회수"
+                android:textColor="#000000" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:text=" 작성일: "
+                android:textColor="#000000" />
+
+            <TextView
+                android:id="@+id/read_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:text="여기 날짜"
+                android:textColor="#000000" />
+
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:id="@+id/read_content"
+            android:hint="내용"
+            android:gravity="top"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/border_below"
+            />
+    </LinearLayout>
+
+
+
+
+</RelativeLayout>
