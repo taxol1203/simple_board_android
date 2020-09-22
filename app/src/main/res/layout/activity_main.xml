@@ -122,15 +122,22 @@
             />
     </LinearLayout>
 -->
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_board"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_recycler"
         android:layout_width="match_parent"
         android:layout_height="500dp"
-        android:layout_below="@+id/headBox"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="42dp"
-        android:layout_marginEnd="20dp" />
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
+        android:layout_below="@+id/headBox">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_board"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+             />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
@@ -143,15 +150,6 @@
         app:fabSize="mini"
          />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/goto_write"
-        android:text="글 쓰기"
-        android:layout_below="@+id/recycler_board"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="20dp"
-        />
 
 
 </RelativeLayout>

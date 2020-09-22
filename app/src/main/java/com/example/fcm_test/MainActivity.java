@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -49,8 +50,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String mJsonString;
     static ArrayList<PersonalData> mArrayList;
     boolean isLoading = false;
+    int curPostidx;
+    float temp_y = 0.0f;
 
-    Button writeButton;
     RecyclerView mRecyclerView;
     BoardAdapter mAdapter;
 
@@ -72,11 +74,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        writeButton = findViewById(R.id.goto_write);
         mRecyclerView = findViewById(R.id.recycler_board);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        writeButton.setOnClickListener(this);
 
         mArrayList = new ArrayList<>();
         //서버로 부터 json 받아옴
@@ -89,6 +88,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         initScrollListener();
 
+        //스크롤 설정
+        final SwipeRefreshLayout mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_recycler);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                int size = mArrayList.size();
+                mArrayList.clear();
+                mAdapter.notifyItemRangeRemoved(0,size);
+                GetData task = new GetData();
+                task.execute("http://" + IP_ADDRESS + "/page/forAndroid/getjson.php", "");
+
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+        /*mRecyclerView.setOnScrollChangeListener(new RecyclerView.OnScrollChangeListener(){
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                //제일 위로 스크롤 하였을 시 새로운 데이터 받기
+                if(!mRecyclerView.canScrollVertically(-1)){
+                    Log.e("scroll_top","hihi");
+                    int size = mArrayList.size();
+                    mArrayList.clear();
+                    mAdapter.notifyItemRangeRemoved(0,size);
+                    GetData task = new GetData();
+                    task.execute("http://" + IP_ADDRESS + "/page/forAndroid/getjson.php", "");
+                }
+            }
+        });*/
 
         /*FirebaseInstanceId.getInstance().getInstanceId()
                 .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
@@ -167,11 +194,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //click listener 들
     @Override
     public void onClick(View v){
-        switch (v.getId()){
+/*        switch (v.getId()){
             case R.id.goto_write:
                 Intent intent1 = new Intent(getApplicationContext(), WritePost.class);
                 startActivity(intent1);
-        }
+        }*/
     }
     private class GetData extends AsyncTask<String, Void, String> {
 
@@ -196,7 +223,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             else {
                 mJsonString = result;
-                showResult(0,5);
+                //Json에 담겨있는 Array의 개수를 센다.
+                JSONObject jsonObject = null;
+                int maxLength;
+                try {
+                    jsonObject = new JSONObject(mJsonString);
+                    JSONArray jsonArray = jsonObject.getJSONArray("webnautes");
+                    maxLength = jsonArray.length() - 1;
+                    showResult(maxLength , maxLength - 5);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                //리사이클러 뷰에게 알림
+                mAdapter.notifyDataSetChanged();;
             }
         }
 
@@ -234,7 +273,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     inputStream = httpURLConnection.getErrorStream();
                 }
 
-
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
@@ -268,8 +306,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             JSONObject jsonObject = new JSONObject(mJsonString);
             JSONArray jsonArray = jsonObject.getJSONArray(TAG_JSON);
-
-            for(int i=start; i<end; i++){
+            //인덱스가 0보다 작아지면 -1로 설정하여 0번까지 탐색하게 한다.
+            if(end < 0){
+                end = -1;
+            }
+            //mArrayList.clear();
+            for(int i = start; i > end; i--){
 
                 JSONObject item = jsonArray.getJSONObject(i);
 
@@ -290,7 +332,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 mArrayList.add(personalData);
             }
-
+            //글 찾기 인덱스 초기화
+            curPostidx = end;
         } catch (JSONException e) {
             Log.d(Tag, "showResult : ", e);
         }
@@ -310,7 +353,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
 
                 if (!isLoading) {
-                    if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == mArrayList.size() - 1) {
+                    if(mArrayList.size() == 0){
+                        Log.e("escape", "bye");
+                    }
+                    else if (linearLayoutManager != null && linearLayoutManager.findLastCompletelyVisibleItemPosition() == mArrayList.size() - 1) {
                         //bottom of list!
                         loadMore();
                         isLoading = true;
@@ -318,8 +364,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
-
-
     }
 
     private void loadMore() {
@@ -333,15 +377,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mArrayList.remove(mArrayList.size() - 1);
                 int scrollPosition = mArrayList.size();
                 mAdapter.notifyItemRemoved(scrollPosition);
-                int currentSize = scrollPosition;
-                int nextLimit = currentSize + 5;
-                Log.e("hihihi", "currentSize:" + String.valueOf(currentSize) + "nextLimit: " + String.valueOf(nextLimit));
-                showResult(currentSize , nextLimit);
-                /*while (currentSize - 1 < nextLimit) {
-                    mArrayList.add("Item " + currentSize);
-                    currentSize++;
-                }*/
 
+                showResult(curPostidx, curPostidx - 5);
+//                mAdapter.addItem(mArrayList);
                 mAdapter.notifyDataSetChanged();
                 isLoading = false;
             }
@@ -392,6 +430,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+
+
     public class BoardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private ArrayList<PersonalData> mList = null;
@@ -439,6 +479,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 super(itemView);
                 progressBar = itemView.findViewById(R.id.progressBar);
             }
+        }
+
+        public  void addItem(ArrayList<PersonalData> tempList) {
+            int pos = mList.size();
+            mList.addAll(tempList);
+            notifyItemInserted(pos);
         }
 
         @NonNull
