@@ -2,9 +2,12 @@ package com.example.fcm_test;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -67,6 +70,13 @@ public class WritePost extends AppCompatActivity {
             super.onPostExecute(s);
 
             progressDialog.dismiss();
+            //메인엑티비티에 메세지 전송함
+            Handler handler = ((MainActivity)MainActivity.context).mHandler ;
+            Message message = handler.obtainMessage() ;
+            message.what = 0;
+            handler.sendMessage(message);
+
+            finish();
             Log.e(Tag, "Post response - " + s);
         }
 

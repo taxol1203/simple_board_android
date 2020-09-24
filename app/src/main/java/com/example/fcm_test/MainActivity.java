@@ -7,12 +7,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -52,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     boolean isLoading = false;
     int curPostidx;
     float temp_y = 0.0f;
+    public static Context context;
 
     RecyclerView mRecyclerView;
     BoardAdapter mAdapter;
@@ -60,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        context = this;
         //툴바
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -88,36 +94,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         initScrollListener();
 
-        //스크롤 설정
+        //스크롤 설정, 스크롤 후
         final SwipeRefreshLayout mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_recycler);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                int size = mArrayList.size();
-                mArrayList.clear();
-                mAdapter.notifyItemRangeRemoved(0,size);
-                GetData task = new GetData();
-                task.execute("http://" + IP_ADDRESS + "/page/forAndroid/getjson.php", "");
-
+                RefreshAdapter();
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
-        /*mRecyclerView.setOnScrollChangeListener(new RecyclerView.OnScrollChangeListener(){
-            @Override
-            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                //제일 위로 스크롤 하였을 시 새로운 데이터 받기
-                if(!mRecyclerView.canScrollVertically(-1)){
-                    Log.e("scroll_top","hihi");
-                    int size = mArrayList.size();
-                    mArrayList.clear();
-                    mAdapter.notifyItemRangeRemoved(0,size);
-                    GetData task = new GetData();
-                    task.execute("http://" + IP_ADDRESS + "/page/forAndroid/getjson.php", "");
-                }
-            }
-        });*/
 
-        /*FirebaseInstanceId.getInstance().getInstanceId()
+        //여기서 부터 파이어베이스 연동
+        FirebaseInstanceId.getInstance().getInstanceId()
                 .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                     @Override
                     public void onComplete(@NonNull Task<InstanceIdResult> task) {
@@ -131,9 +119,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d(Tag, token);
                         Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
                     }
-                });*/
-
-        /*FirebaseMessaging.getInstance().subscribeToTopic("weather")
+                });
+        //FirebaseMessaging.getInstance().subscribeToTopic("post");
+        FirebaseMessaging.getInstance().subscribeToTopic("weather")
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -145,20 +133,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
                     }
                 });
-        FirebaseMessaging.getInstance().subscribeToTopic("windy")
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        String msg = "Topic sunny is subscribed";
-                        if (!task.isSuccessful()) {
-                            msg = "Topic sunny subscribing failed";
-                        }
-                        Log.d("FCMTest", msg);
-                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
-                    }
-                });*/
     }
+    @SuppressLint("HandlerLeak")
+    public final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            int MSG_A = 0;
+            if (msg.what == MSG_A) {
+                RefreshAdapter();
+            }
+        }
+    } ;
 
+    //어뎁터 초기화 하기
+    public void RefreshAdapter(){
+        int size = mArrayList.size();
+        mArrayList.clear();
+        mAdapter.notifyItemRangeRemoved(0,size);
+        GetData task = new GetData();
+        task.execute("http://" + IP_ADDRESS + "/page/forAndroid/getjson.php", "");
+    }
     @Override
     protected void onRestart() {
         super.onRestart();
@@ -181,6 +175,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (item.getItemId())
         {
             case R.id.search :
+                AlertDialog.Builder dlg = new AlertDialog.Builder(MainActivity.this);
+                dlg.setTitle("계발에서 개발까지"); //제목
+                final String[] versionArray = new String[] {"계발","에서","개발"};
+
+                dlg.setItems(versionArray, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+//                버튼 클릭시 동작
+                dlg.setPositiveButton("확인",new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int which) {
+                        //토스트 메시지
+                        Toast.makeText(MainActivity.this,"확인을 눌르셨습니다.",Toast.LENGTH_SHORT).show();
+                    }
+                });
+                dlg.show();
+
                 Toast.makeText(getApplicationContext(), "Search Click", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.option :
