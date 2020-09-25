@@ -1,4 +1,4 @@
-package com.example.fcm_test;
+package com.example.fcm_test.Firebase;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -17,6 +17,8 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.example.fcm_test.MainActivity;
+import com.example.fcm_test.R;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 

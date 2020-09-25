@@ -1,4 +1,4 @@
-package com.example.fcm_test;
+package com.example.fcm_test.Firebase;
 
 import android.app.ActivityManager;
 import android.app.NotificationChannel;

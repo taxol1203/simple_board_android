@@ -9,10 +9,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,11 +22,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import static android.content.ContentValues.TAG;
+
+import com.example.fcm_test.dialog.CustomSearchDialog;
+import com.example.fcm_test.dialog.MyDialogListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -58,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int curPostidx;
     float temp_y = 0.0f;
     public static Context context;
+    //검색 다이얼로그 결과
+    String dialogResult;
+    String dialogCatgo;
 
     RecyclerView mRecyclerView;
     BoardAdapter mAdapter;
@@ -175,25 +177,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (item.getItemId())
         {
             case R.id.search :
-                AlertDialog.Builder dlg = new AlertDialog.Builder(MainActivity.this);
-                dlg.setTitle("계발에서 개발까지"); //제목
-                final String[] versionArray = new String[] {"계발","에서","개발"};
+                CustomSearchDialog customDialog = new CustomSearchDialog(MainActivity.this);
 
-                dlg.setItems(versionArray, new DialogInterface.OnClickListener() {
+                customDialog.callFunction();
+                customDialog.setDialogListener(new MyDialogListener() {  // MyDialogListener 를 구현
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onPositiveClicked(String catgo, String result) {
+                        dialogCatgo = catgo;
+                        dialogResult = result;
+                        Intent intent_search = new Intent(getApplicationContext(), SearchResultActivity.class);
+                        intent_search.putExtra("catgo", dialogCatgo);
+                        intent_search.putExtra("keyword", dialogResult);
+                        startActivity(intent_search);
+                        Log.e("dialog", dialogCatgo + " " + dialogResult);
+                    }
 
+                    @Override
+                    public void onNegativeClicked() {
+                        Log.d("MyDialogListener","onNegativeClicked");
                     }
                 });
-//                버튼 클릭시 동작
-                dlg.setPositiveButton("확인",new DialogInterface.OnClickListener(){
-                    public void onClick(DialogInterface dialog, int which) {
-                        //토스트 메시지
-                        Toast.makeText(MainActivity.this,"확인을 눌르셨습니다.",Toast.LENGTH_SHORT).show();
-                    }
-                });
-                dlg.show();
-
                 Toast.makeText(getApplicationContext(), "Search Click", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.option :
@@ -381,67 +384,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void loadMore() {
         mArrayList.add(null);
-        mAdapter.notifyItemInserted(mArrayList.size() - 1);
+        //layout measurements 를 계산하는 과정에서 view를 업데이트 하는 경우 나오는 경고, post, runnable로 해결한다.
+        mRecyclerView.post(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.notifyItemInserted(mArrayList.size() - 1);
+            }
+        });
+
 
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mArrayList.remove(mArrayList.size() - 1);
-                int scrollPosition = mArrayList.size();
-                mAdapter.notifyItemRemoved(scrollPosition);
+                //대체 왜 되는지 모르겟다. i don't know why this operate normally
+                if(mArrayList.size() == 0){
+                    Log.e("noway", "is okay?");
+                    showResult(curPostidx, curPostidx - 5);
+                    mAdapter.notifyDataSetChanged();
+                    isLoading = false;
+                }
+                else {
+                    mArrayList.remove(mArrayList.size() - 1);
+                    int scrollPosition = mArrayList.size();
+                    mAdapter.notifyItemRemoved(scrollPosition);
 
-                showResult(curPostidx, curPostidx - 5);
+                    showResult(curPostidx, curPostidx - 5);
 //                mAdapter.addItem(mArrayList);
-                mAdapter.notifyDataSetChanged();
-                isLoading = false;
+                    mAdapter.notifyDataSetChanged();
+                    isLoading = false;
+                }
             }
         }, 2000);
 
 
     }
 
-    public static class PersonalData {
-        private String member_idx;
-        private String member_writer;
-        private String member_title;
-        private String member_date;
-        private String member_hit;
-
-        public String getMember_idx() {
-            return member_idx;
-        }
-        public String getMember_title() {
-            return member_title;
-        }
-        public String getMember_writer() {
-            return member_writer;
-        }
-        public String getMember_date() {
-            return member_date;
-        }
-        public String getMember_hit() {
-            return member_hit;
-        }
-
-        public void setMember_idx(String member_idx) {
-            this.member_idx = member_idx;
-        }
-
-        public void setMember_writer(String member_writer) {
-            this.member_writer = member_writer;
-        }
-
-        public void setMember_title(String member_title) {
-            this.member_title = member_title;
-        }
-        public void setMember_date(String member_date) {
-            this.member_date = member_date;
-        }
-        public void setMember_hit(String member_hit) {
-            this.member_hit = member_hit;
-        }
-    }
 
 
 

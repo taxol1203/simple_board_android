@@ -46,6 +46,7 @@
                 android:layout_height="30dp"
                 android:id="@+id/catgo"
                 android:layout_weight="4"
+                android:entries="@array/category"
                 />
             <EditText
                 android:layout_width="match_parent"
